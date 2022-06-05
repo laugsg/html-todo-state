@@ -7,26 +7,36 @@
     <title>Todo App With State</title>
   </head>
   <body>
-
     <div>
-        <h1>Todos List</h1>
-        <input type="text" id="todo" placeholder="Add Todo" />
-        <button id="todoBtn">Add Todo</button>
-        <ul id="todos"></ul>
+      <h1>Todos List</h1>
+      <input type="text" id="todo" placeholder="Add Todo" />
+      <button id="todoBtn">Add Todo</button>
+      <ul id="todos"></ul>
     </div>
 
     <div>
-        <h1>Goals List</h1>
-        <input id="goal" type="text" placeholder="Add Goal" />
-        <button id="goalBtn">Add Goal</button>
-        <ul id="goals"></ul>
+      <h1>Goals List</h1>
+      <input id="goal" type="text" placeholder="Add Goal" />
+      <button id="goalBtn">Add Goal</button>
+      <ul id="goals"></ul>
     </div>
-
-
 
     <script type="application/javascript">
+      //#region ID GENERATOR
+      /** Generate Unique IDs
+       * Helper function to generate uniques IDs
+       * @returns {string}
+       */
+      function generateId() {
+        return (
+          Math.random().toString(36).substring(2) +
+          new Date().getTime().toString(36)
+        );
+      }
+      //#endregion
+
       //#region Library Code
-      // Library Code
+
       function createStore(reducer) {
         // The store should have 4 parts
         // 1. The state
@@ -62,6 +72,7 @@
            * will be stored.
            */
           state = reducer(state, action);
+          // execute all listeners each time that dispatch is called
           listeners.forEach((listener) => listener());
         };
 
@@ -76,17 +87,21 @@
         };
       }
       //#endregion
-      
-      
+
       //#region App Code
-      // App Code
+      // 1. Variables
+      // 2. Action Creators
+      // 3. Reducers
+
+      //#region 1. Variables
       const ADD_TODO = "ADD_TODO";
       const REMOVE_TODO = "REMOVE_TODO";
       const TOGGLE_TODO = "TOGGLE_TODO";
       const ADD_GOAL = "ADD_GOAL";
       const REMOVE_GOAL = "REMOVE_GOAL";
+      //#endregion
 
-      // Action Creators
+      //#region 2. Action Creators
       function addTodoAction(todo) {
         return {
           type: ADD_TODO,
@@ -121,7 +136,9 @@
           id,
         };
       }
+      //#endregion
 
+      //#region 3. Reducers
       // reducers _handler_ : drive changes to state based in actions
       function todos(state = [], action) {
         // actions : data event
@@ -158,48 +175,134 @@
           goals: goals(state.goals, action),
         };
       }
+      //#endregion
 
       const store = createStore(App);
       store.subscribe(() => {
         console.log(`The new state is: `, store.getState());
       });
+      store.subscribe(() => {
+        /** DOM as a representation of the State
+         * The first flow of data goes to the store,
+         * it's focused on save the data into the store.
+         * 
+         * The second flow of data goes 
+         * from the store to the DOM,
+         * It's focused on get the data of the store in a proper manner,
+         * then reset the DOM to blank with the purpose to be ready for
+         * present the most updated data of the store,
+         * finally append it to the DOM.
+         */
 
+        // todos & goals are Arrays of string items
+        const { todos, goals } = store.getState();
+
+        // Clean DOM at each iteration to reflect just final result
+        document.getElementById("todos").innerHTML = "";
+        document.getElementById("goals").innerHTML = "";
+
+        // iterate for each string item
+        // to pass them one by one into AddTodoToDOM
+        todos.forEach((todo) => AddTodoToDOM(todo));
+        goals.forEach((goal) => AddGoalToDOM(goal));
+      });
+      //#endregion
+
+      //#region OLD CODE
       // dispatch _entrypoint_
-      store.dispatch(
-        addTodoAction({
-          id: 0,
-          name: "Learn React",
-          complete: false,
-        })
-      );
+      //   store.dispatch(
+      //     addTodoAction({
+      //       id: 0,
+      //       name: "Learn React",
+      //       complete: false,
+      //     })
+      //   );
 
-      store.dispatch(
-        addTodoAction({
-          id: 1,
-          name: "Learn Redux",
-          complete: false,
-        })
-      );
+      //   store.dispatch(
+      //     addTodoAction({
+      //       id: 1,
+      //       name: "Learn Redux",
+      //       complete: false,
+      //     })
+      //   );
 
-      store.dispatch(removeTodoAction(0));
+      //   store.dispatch(removeTodoAction(0));
 
-      store.dispatch(toggleTodoAction(1));
+      //   store.dispatch(toggleTodoAction(1));
 
-      store.dispatch(
-        addGoalAction({
-          id: 0,
-          name: "React Dev",
-        })
-      );
+      //   store.dispatch(
+      //     addGoalAction({
+      //       id: 0,
+      //       name: "React Dev",
+      //     })
+      //   );
 
-      store.dispatch(
-        addGoalAction({
-          id: 1,
-          name: "Redux Dev",
-        })
-      );
+      //   store.dispatch(
+      //     addGoalAction({
+      //       id: 1,
+      //       name: "Redux Dev",
+      //     })
+      //   );
 
-      store.dispatch(removeGoalAction(0));
+      //   store.dispatch(removeGoalAction(0));
+      //#endregion
+
+      //#region DOM code
+      // 1. Eventhandlers : Add Todos to Store
+      // 2. AddTodoToDOM : Take Todos from the Store and add them to DOM
+
+      //#region Eventhandlers
+      function addTodo() {
+        const input = document.getElementById("todo");
+        const name = input.value;
+        input.value = "";
+
+        store.dispatch(
+          addTodoAction({
+            id: generateId(),
+            name,
+            complete: false,
+          })
+        );
+      }
+
+      function addGoal() {
+        const input = document.getElementById("goal");
+        const name = input.value;
+        input.value = "";
+
+        store.dispatch(
+          addGoalAction({
+            id: generateId(),
+            name,
+          })
+        );
+      }
+
+      document.getElementById("todoBtn").addEventListener("click", addTodo);
+      document.getElementById("goalBtn").addEventListener("click", addGoal);
+      //#endregion
+
+      //#endregion
+
+      //#region AddTodoToDOM
+      // Add one todo to DOM
+      function AddTodoToDOM(todo) {
+        const node = document.createElement("li");
+        const text = document.createTextNode(todo.name);
+        node.append(text);
+
+        document.getElementById("todos").appendChild(node);
+      }
+
+      // Add one goal to DOM
+      function AddGoalToDOM(goal) {
+        const node = document.createElement("li");
+        const text = document.createTextNode(goal.name);
+        node.append(text);
+
+        document.getElementById("goals").appendChild(node);
+      }
       //#endregion
     </script>
   </body>
