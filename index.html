@@ -86,7 +86,7 @@
           dispatch,
         };
       }
-      //#endregion
+      //#endregion Library Code
 
       //#region App Code
       // 1. Variables
@@ -206,7 +206,7 @@
         todos.forEach((todo) => AddTodoToDOM(todo));
         goals.forEach((goal) => AddGoalToDOM(goal));
       });
-      //#endregion
+      //#endregion App Code
 
       //#region OLD CODE
       // dispatch _entrypoint_
@@ -245,13 +245,13 @@
       //   );
 
       //   store.dispatch(removeGoalAction(0));
-      //#endregion
+      //#endregion OLD CODE
 
       //#region DOM code
-      // 1. Eventhandlers : Add Todos to Store
-      // 2. AddTodoToDOM : Take Todos from the Store and add them to DOM
+      // 1. Add Todos to Store : Eventhandlers
+      // 2. Add Todos to DOM : Take Todos from the Store and add them to DOM
 
-      //#region Eventhandlers
+      //#region 1. Add Todos to Store
       function addTodo() {
         const input = document.getElementById("todo");
         const name = input.value;
@@ -283,14 +283,17 @@
       document.getElementById("goalBtn").addEventListener("click", addGoal);
       //#endregion
 
-      //#endregion
-
-      //#region AddTodoToDOM
+      //#region 2. Add Todos to DOM
       // Add one todo to DOM
       function AddTodoToDOM(todo) {
         const node = document.createElement("li");
         const text = document.createTextNode(todo.name);
         node.append(text);
+
+        node.style.textDecoration = todo.complete ? 'line-through' : 'none'
+        node.addEventListener('click', () => {
+            store.dispatch(toggleTodoAction(todo.id))
+        })
 
         document.getElementById("todos").appendChild(node);
       }
@@ -304,6 +307,8 @@
         document.getElementById("goals").appendChild(node);
       }
       //#endregion
+      
+      //#endregion DOM code
     </script>
   </body>
 </html>
