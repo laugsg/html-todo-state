@@ -208,45 +208,6 @@
       });
       //#endregion App Code
 
-      //#region OLD CODE
-      // dispatch _entrypoint_
-      //   store.dispatch(
-      //     addTodoAction({
-      //       id: 0,
-      //       name: "Learn React",
-      //       complete: false,
-      //     })
-      //   );
-
-      //   store.dispatch(
-      //     addTodoAction({
-      //       id: 1,
-      //       name: "Learn Redux",
-      //       complete: false,
-      //     })
-      //   );
-
-      //   store.dispatch(removeTodoAction(0));
-
-      //   store.dispatch(toggleTodoAction(1));
-
-      //   store.dispatch(
-      //     addGoalAction({
-      //       id: 0,
-      //       name: "React Dev",
-      //     })
-      //   );
-
-      //   store.dispatch(
-      //     addGoalAction({
-      //       id: 1,
-      //       name: "Redux Dev",
-      //     })
-      //   );
-
-      //   store.dispatch(removeGoalAction(0));
-      //#endregion OLD CODE
-
       //#region DOM code
       // 1. Add Todos to Store : Eventhandlers
       // 2. Add Todos to DOM : Take Todos from the Store and add them to DOM
@@ -283,13 +244,27 @@
       document.getElementById("goalBtn").addEventListener("click", addGoal);
       //#endregion
 
+      //#region 0. Helper: Remove Button
+      function createRemoveButton(onClick){
+        const removeBtn = document.createElement('button')
+        removeBtn.innerHTML = 'X'
+        removeBtn.addEventListener('click', onClick)
+        return removeBtn
+      }
+      //#endregion
+
       //#region 2. Add Todos to DOM
       // Add one todo to DOM
       function AddTodoToDOM(todo) {
         const node = document.createElement("li");
         const text = document.createTextNode(todo.name);
-        node.append(text);
 
+        const removeBtn = createRemoveButton(() => {
+          store.dispatch(removeTodoAction(todo.id))
+        })
+        
+        node.appendChild(text);
+        node.appendChild(removeBtn)
         node.style.textDecoration = todo.complete ? 'line-through' : 'none'
         node.addEventListener('click', () => {
             store.dispatch(toggleTodoAction(todo.id))
@@ -302,8 +277,13 @@
       function AddGoalToDOM(goal) {
         const node = document.createElement("li");
         const text = document.createTextNode(goal.name);
-        node.append(text);
 
+        const removeBtn = createRemoveButton(() => {
+          store.dispatch(removeGoalAction(goal.id))
+        })
+        
+        node.appendChild(text);
+        node.appendChild(removeBtn)
         document.getElementById("goals").appendChild(node);
       }
       //#endregion
